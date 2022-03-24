@@ -3,10 +3,7 @@ def mavenHome = tool name: "maven3.8.4"
 echo "The Node name is: ${env.NODE_NAME}"
 echo "The Job name is: ${env.JOB_NAME}"
 echo "The Build number is: ${env.BUILD_NUMBER}"
- properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5'))])
- properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')), pipelineTriggers([pollSCM('* * * * *')])]
-  
-
+ 
 //Checkout stage
 stage('CheckoutCode'){
 git branch: 'development', credentialsId: '797700ad-44ac-4cfc-b16f-dc066c07a631', 
