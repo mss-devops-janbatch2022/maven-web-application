@@ -1,34 +1,42 @@
 node{
+buildName 'Dev - ${BUILD_NUMBER}' 
+buildDescription 'Pipeline Script - Scriptedway'
+
 def mavenHome = tool name: "maven3.8.4"
 echo "The Node name is: ${env.NODE_NAME}"
 echo "The Job name is: ${env.JOB_NAME}"
 echo "The Build number is: ${env.BUILD_NUMBER}"
- properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5'))])
- properties([pipelineTriggers([pollSCM('* * * * *')])])
- 
+
+properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')), [$class: 'JobLocalConfiguration', changeReasonComment: '']])
+properties([[$class: 'JobLocalConfiguration', changeReasonComment: ''], pipelineTriggers([pollSCM('* * * * *')])])
+
 //Checkout stage
 stage('CheckoutCode'){
 git branch: 'development', credentialsId: '797700ad-44ac-4cfc-b16f-dc066c07a631', 
 url: 'https://github.com/mss-devops-janbatch2022/maven-web-application.git'
 }
+
 //Build stage
 stage('Build'){
 sh "$mavenHome/bin/mvn clean package"
 }
-  
+
 //Generate SonarQube Report
 stage('sonarQubeReport'){
 sh "$mavenHome/bin/mvn sonar:sonar"
 }
+
 //Upload Artifact into Artifactory repo
 stage('UploadArtifactIntoNexus'){
 sh "$mavenHome/bin/mvn deploy"
 }
+
 //Deploy App into Tomcat Server
 stage('DeployappIntoTomcat'){
 sshagent(['515aaa45-c101-4857-97cd-6c32f7850313']) {
-sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@13.127.97.70:/opt/apache-tomcat-9.0.59/webapps"
+   sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@3.13.234.78.209:/opt/apache-tomcat-9.0.59/webapps"
 }
 }
+
 
 }//node closing
